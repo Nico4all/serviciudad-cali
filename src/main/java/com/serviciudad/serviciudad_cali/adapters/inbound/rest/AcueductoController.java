@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/acueducto")
+@RequestMapping("/acueducto")
 public class AcueductoController {
 
     private final ConsultarFacturasAcueductoService service;
@@ -19,5 +19,10 @@ public class AcueductoController {
     @GetMapping("/{idCliente}")
     public List<FacturaAcueducto> obtenerFacturas(@PathVariable String idCliente) {
         return service.ejecutar(idCliente);
+    }
+
+    @GetMapping("/ping")
+    public String ping() {
+        return "Servicio de Acueducto activo!";
     }
 }
