@@ -1,7 +1,7 @@
 package com.serviciudad.serviciudad_cali.adapters.inbound.rest;
 
+import com.serviciudad.serviciudad_cali.dto.DeudaConsolidadaDTO;
 import com.serviciudad.serviciudad_cali.application.service.ConsultaUnificadaService;
-import com.serviciudad.serviciudad_cali.domain.model.FacturaUnificada;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,8 +14,8 @@ public class ConsultaUnificadaController {
         this.consultaService = consultaService;
     }
 
-    @GetMapping("/{idCliente}")
-    public FacturaUnificada obtenerFacturas(@PathVariable String idCliente) {
-        return consultaService.obtenerFacturasCliente(idCliente);
+    @GetMapping("/{clienteId}")
+    public DeudaConsolidadaDTO obtenerFacturas(@PathVariable String clienteId) {
+        return consultaService.obtenerFacturasCliente(clienteId);
     }
 }
