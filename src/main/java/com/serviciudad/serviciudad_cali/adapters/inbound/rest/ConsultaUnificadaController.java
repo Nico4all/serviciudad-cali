@@ -5,7 +5,7 @@ import com.serviciudad.serviciudad_cali.application.service.ConsultaUnificadaSer
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/servicios")
+@RequestMapping("/servicios")
 public class ConsultaUnificadaController {
 
     private final ConsultaUnificadaService consultaService;
