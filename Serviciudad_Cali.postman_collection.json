@@ -1,0 +1,206 @@
+{
+	"info": {
+		"_postman_id": "f023824f-2388-4950-8b62-ee42f398dd0d",
+		"name": "Serviciudad_Cali",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44892135",
+		"_collection_link": "https://nico4all.postman.co/workspace/Nico4all's-Workspace~4b07b55d-55f2-4953-8a67-012ba59593ad/collection/44892135-f023824f-2388-4950-8b62-ee42f398dd0d?action=share&source=collection_link&creator=44892135"
+	},
+	"item": [
+		{
+			"name": "Servicios",
+			"item": [
+				{
+					"name": "Servicios 1",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/servicios/0001234567",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"servicios",
+								"0001234567"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Servicios 2",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/servicios/0009876543",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"servicios",
+								"0009876543"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Servicios 3",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/servicios/0001122334",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"servicios",
+								"0001122334"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Energia",
+			"item": [
+				{
+					"name": "Energia 1",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/energia/0001234567",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"energia",
+								"0001234567"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Energia 2",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/energia/0009876543",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"energia",
+								"0009876543"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Energia 3",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/energia/0001122334",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"energia",
+								"0001122334"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Acueducto",
+			"item": [
+				{
+					"name": "Acueducto 1",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/acueducto/0001234567",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"acueducto",
+								"0001234567"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Acueducto 2",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/acueducto/0009876543",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"acueducto",
+								"0009876543"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Acueducto 3",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/acueducto/0001122334",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"acueducto",
+								"0001122334"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
