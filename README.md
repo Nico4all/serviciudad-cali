@@ -1,3 +1,11 @@
+Integrantes:
+Esteban Nicolas Sanchez Tobar- 22506731
+Alejandro Muñoz Franco- 22506704
+Andres Felipe Gonzalez Ortegon- 2226012
+
+
+
+
 #Instrucciones para montaje del proyecto.
 ## 1. Clonar repositorio
 ### git clone https://github.com/Nico4all/serviciudad-cali
