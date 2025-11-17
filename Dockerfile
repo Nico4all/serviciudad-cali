@@ -27,5 +27,8 @@ EXPOSE 8080
 # Variables de entorno por defecto (se pueden sobrescribir en Render)
 ENV SPRING_PROFILES_ACTIVE=prod
 
+# Exponer el puerto donde corre la app
+EXPOSE 8080
+
 # Ejecutar el jar generado
 ENTRYPOINT ["java", "-jar", "target/serviciudad-cali-0.0.1-SNAPSHOT.jar"]
