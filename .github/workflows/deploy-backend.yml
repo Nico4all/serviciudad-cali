@@ -1,0 +1,45 @@
+name: Deploy Backend to Render - ServiCiudad Cali
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline - ServiCiudad Cali"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'production'
+        type: choice
+        options: [production, staging]
+
+jobs:
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: https://serviciudad-cali.onrender.com
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trigger Render Deploy
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}")
+          http_code=$(echo "$response" | tail -n1)
+          if [ "$http_code" != "200" ] && [ "$http_code" != "201" ]; then
+            echo "Deploy failed with code $http_code"
+            exit 1
+          fi
+      - name: Wait for deployment
+        run: sleep 120
+      - name: Health check
+        run: |
+          for i in {1..10}; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" https://serviciudad-cali.onrender.com/actuator/health)
+            if [ "$status" = "200" ]; then exit 0; fi
+            sleep 15
+          done
+          exit 1
