@@ -188,12 +188,22 @@ jobs:
   promote-or-rollback:
     name: Promote or Rollback
     runs-on: ubuntu-latest
-    needs: canary-deploy
+    needs: docker-build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp
+
+      - name: Load Docker image
+        run: docker load -i /tmp/image.tar
+
       - name: Decide promotion or rollback
         run: |
-          # Aquí se puede agregar lógica real de tests/monitoring
           PROMOTE=true
           if [ "$PROMOTE" = true ]; then
             echo "Promoting canary to stable..."
@@ -205,4 +215,3 @@ jobs:
             echo "Rolling back..."
             docker stop serviciudad-canary || true
             docker rm serviciudad-canary || true
-          fi
