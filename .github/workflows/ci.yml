@@ -215,3 +215,4 @@ jobs:
             echo "Rolling back..."
             docker stop serviciudad-canary || true
             docker rm serviciudad-canary || true
+          fi
