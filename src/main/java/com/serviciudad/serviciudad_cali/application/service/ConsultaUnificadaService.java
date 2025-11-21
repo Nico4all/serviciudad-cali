@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,11 +27,18 @@ public class ConsultaUnificadaService {
     }
 
     public DeudaConsolidadaDTO obtenerFacturasCliente(String clienteId) {
-        // obtener listas
+
         List<FacturaEnergia> energiaList = energiaRepo.obtenerFacturasPorCliente(clienteId);
         List<FacturaAcueducto> acueductoList = acueductoRepo.obtenerFacturasPorCliente(clienteId);
 
-        // tomar la factura más reciente 
+        // Convertir listas inmutables a mutables antes de ordenar
+        energiaList = new ArrayList<>(energiaList);
+        acueductoList = new ArrayList<>(acueductoList);
+
+        // Orden descendente por periodo
+        energiaList.sort((a, b) -> b.getPeriodo().compareTo(a.getPeriodo()));
+        acueductoList.sort((a, b) -> b.getPeriodo().compareTo(a.getPeriodo()));
+
         DetalleServicioDTO energiaDTO = energiaList.isEmpty()
                 ? new DetalleServicioDTO(null, "0 kWh", BigDecimal.ZERO)
                 : DeudaMapper.fromEnergia(energiaList.get(0));
@@ -41,15 +49,13 @@ public class ConsultaUnificadaService {
 
         BigDecimal total = energiaDTO.getValorPagar().add(acueductoDTO.getValorPagar());
 
-        DeudaConsolidadaDTO dto = new DeudaConsolidadaBuilder()
+        return new DeudaConsolidadaBuilder()
                 .withClienteId(clienteId)
-                .withNombreCliente("Juan Pérez") 
+                .withNombreCliente("Juan Pérez")
                 .withFechaConsulta(Instant.now())
                 .withEnergia(energiaDTO)
                 .withAcueducto(acueductoDTO)
                 .withTotalAPagar(total)
                 .build();
-
-        return dto;
     }
 }

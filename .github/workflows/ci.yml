@@ -14,7 +14,9 @@ jobs:
   build-test:
     name: Build & Test
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      checks: write
     services:
       mariadb:
         image: mariadb:10.5
@@ -60,12 +62,13 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: test_password
 
       - name: Test report
-        if: always()
+        if: ${{ github.repository == github.event.pull_request.head.repo.full_name }}
         uses: dorny/test-reporter@v1
         with:
           name: Maven Tests
-          path: target/surefire-reports/*.xml
+          path: target/surefire-reports/TEST-*.xml
           reporter: java-junit
+          fail-on-error: false
 
       - name: Upload coverage to Codecov
         if: success()
