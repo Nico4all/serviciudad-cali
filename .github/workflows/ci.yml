@@ -205,6 +205,7 @@ jobs:
       - name: Decide promotion or rollback
         run: |
           PROMOTE=true
+          docker tag serviciudad-cali-backend:latest serviciudad-cali-backend:canary
           if [ "$PROMOTE" = true ]; then
             echo "Promoting canary to stable..."
             docker stop serviciudad-stable || true
