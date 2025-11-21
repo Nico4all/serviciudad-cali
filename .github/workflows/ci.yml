@@ -60,7 +60,7 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: test_password
 
       - name: Test report
-        if: always()
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: dorny/test-reporter@v1
         with:
           name: Maven Tests
