@@ -2,9 +2,9 @@ name: CI Pipeline - ServiCiudad Cali
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 env:
   JAVA_VERSION: 21
@@ -76,7 +76,7 @@ jobs:
         with:
           files: ./target/site/jacoco/jacoco.xml
           token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true  # falla CI si no alcanza la cobertura
+          fail_ci_if_error: true # falla CI si no alcanza la cobertura
 
   package:
     name: Package JAR
@@ -139,14 +139,14 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
       - name: Upload Trivy results
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   canary-deploy:
     name: Canary Deploy
@@ -176,8 +176,14 @@ jobs:
 
       - name: Smoke test Canary
         run: |
-          sleep 10
-          curl -f http://localhost:8081/actuator/health || exit 1
+          for i in {1..30}; do
+            if curl -f http://localhost:8081/actuator/health; then
+              echo "Canary service is up!"
+              break
+            fi
+            echo "Waiting for Canary service..."
+            sleep 2
+          done
 
   promote-or-rollback:
     name: Promote or Rollback
