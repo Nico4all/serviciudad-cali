@@ -5,6 +5,11 @@ WORKDIR /app
 # Copiar pom y mvnw para cache de dependencias
 COPY pom.xml mvnw ./
 COPY .mvn .mvn
+
+# Dar permiso de ejecución a mvnw
+RUN chmod +x mvnw
+
+# Descargar dependencias offline
 RUN ./mvnw dependency:go-offline
 
 # Copiar código y compilar
