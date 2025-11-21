@@ -1,34 +1,28 @@
-# Imagen base de OpenJDK (compatible con Spring Boot y Java 21+)
-FROM eclipse-temurin:21-jdk
-
-# Establecer el directorio de trabajo
+# Stage 1: Build
+FROM eclipse-temurin:21-jdk AS builder
 WORKDIR /app
 
-# Copiar el archivo Maven Wrapper o pom.xml
-COPY pom.xml ./
-COPY mvnw ./
+# Copiar pom y mvnw para cache de dependencias
+COPY pom.xml mvnw ./
 COPY .mvn .mvn
-
-# Descargar dependencias (esto se cachea para builds más rápidos)
 RUN ./mvnw dependency:go-offline
 
-# Copiar el resto del código fuente
+# Copiar código y compilar
 COPY src ./src
-
-# Compilar el proyecto
 RUN ./mvnw clean package -DskipTests
+
+# Stage 2: Runtime
+FROM eclipse-temurin:21-jdk
+WORKDIR /app
 
 # Copiar solo el JAR generado
 COPY --from=builder /app/target/*.jar app.jar
 
-# Exponer el puerto donde corre la app
+# Exponer el puerto
 EXPOSE 8080
 
-# Variables de entorno por defecto (se pueden sobrescribir en Render)
+# Variables de entorno
 ENV SPRING_PROFILES_ACTIVE=prod
 
-# Exponer el puerto donde corre la app
-EXPOSE 8080
-
-# Ejecutar el jar generado
-ENTRYPOINT ["java", "-jar", "target/serviciudad-cali-0.0.1-SNAPSHOT.jar"]
+# Ejecutar la app
+ENTRYPOINT ["java", "-jar", "app.jar"]
