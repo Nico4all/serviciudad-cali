@@ -2,7 +2,6 @@ package com.serviciudad.serviciudad_cali.adapters.outbound.acueducto;
 
 import com.serviciudad.serviciudad_cali.domain.model.FacturaAcueducto;
 import com.serviciudad.serviciudad_cali.domain.port.AcueductoRepositoryPort;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,7 +12,6 @@ public class AcueductoRepositoryAdapter implements AcueductoRepositoryPort {
 
     private final SpringDataAcueductoRepository repository;
 
-    @Autowired
     public AcueductoRepositoryAdapter(SpringDataAcueductoRepository repository) {
         this.repository = repository;
     }
