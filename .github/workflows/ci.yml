@@ -2,9 +2,9 @@ name: CI Pipeline - ServiCiudad Cali
 
 on:
   push:
-    branches: ["*", "**"]  
+    branches: ['**']        # todos los pushes en cualquier rama
   pull_request:
-    branches: [main, develop, nico]   
+    branches: ['**']        # todos los PRs (cualquier base branch)
 
 env:
   JAVA_VERSION: 21
@@ -63,7 +63,7 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: test_password
 
       - name: Test report
-        if: ${{ github.repository == github.event.pull_request.head.repo.full_name }}
+        if: ${{ github.event_name == 'pull_request' }}
         uses: dorny/test-reporter@v1
         with:
           name: Maven Tests
@@ -174,20 +174,53 @@ jobs:
       - name: Load Docker image
         run: docker load -i /tmp/image.tar
 
-      - name: Tag as canary
-        run: docker tag serviciudad-cali-backend:latest serviciudad-cali-backend:canary
-
-      - name: Run Canary container
+      - name: Prepare docker network and DB for Canary
         run: |
-          docker stop serviciudad-canary || true
-          docker rm serviciudad-canary || true
-          docker run -d --name serviciudad-canary \
-            -p 8081:8080 \
-            serviciudad-cali-backend:canary
-          docker ps -a 
-          docker logs serviciudad-canary
+          # Crear red (idempotente)
+          docker network create ci_net || true
 
-      - name: Smoke test Canary
+          # Eliminar contenedores previos si existen
+          docker rm -f serviciudad-mariadb || true
+          docker rm -f serviciudad-canary || true
+
+          # Levantar MariaDB para Canary en la red ci_net
+          docker run -d --name serviciudad-mariadb --network ci_net \
+            -e MYSQL_ROOT_PASSWORD=root123 \
+            -e MYSQL_DATABASE=serviciudad_db \
+            -e MYSQL_USER=serviciudad \
+            -e MYSQL_PASSWORD=serviciudad123 \
+            mariadb:11.4
+
+          echo "Waiting for MariaDB to be ready..."
+          for i in {1..40}; do
+            if docker exec serviciudad-mariadb mysqladmin ping -h localhost -proot123 --silent; then
+              echo "MariaDB is up!"
+              break
+            fi
+            echo "MariaDB not ready yet... retrying"
+            sleep 3
+          done
+
+      - name: Tag image as canary
+        run: docker tag serviciudad-cali-backend:latest serviciudad-cali-backend:canary || true
+
+      - name: Run Canary container (same docker network so it can connect to DB)
+        run: |
+          docker run -d --name serviciudad-canary --network ci_net \
+            -p 8081:8080 \
+            -e SPRING_DATASOURCE_URL=jdbc:mariadb://serviciudad-mariadb:3306/serviciudad_db \
+            -e SPRING_DATASOURCE_USERNAME=serviciudad \
+            -e SPRING_DATASOURCE_PASSWORD=serviciudad123 \
+            -e SPRING_JPA_HIBERNATE_DDL_AUTO=update \
+            -e SERVER_PORT=8080 \
+            serviciudad-cali-backend:canary
+
+          echo "Container list:"
+          docker ps -a
+          echo "Last 200 log lines (canary):"
+          docker logs --tail 200 serviciudad-canary || true
+
+      - name: Smoke test Canary (HTTP code check)
         run: |
           echo "Waiting for Canary health endpoint..."
           for i in {1..40}; do
@@ -200,6 +233,7 @@ jobs:
             sleep 3
           done
           echo "ERROR: Canary did not become healthy"
+          docker logs --tail 400 serviciudad-canary || true
           exit 1
 
   promote-or-rollback:
@@ -224,14 +258,25 @@ jobs:
 
       - name: Promote or Rollback
         run: |
-          if [ "$PROMOTE" = "true" ]; then
+          if [ "${PROMOTE}" = "true" ]; then
             echo "Promoting Canary to Stable..."
-            docker stop serviciudad-stable || true
-            docker rm serviciudad-stable || true
-            docker tag serviciudad-cali-backend:canary serviciudad-cali-backend:latest
-            docker run -d --name serviciudad-stable -p 8080:8080 serviciudad-cali-backend:latest
+            docker rm -f serviciudad-stable || true
+            docker rm -f serviciudad-canary || true
+
+            # ejecutar stable en la misma red para que use DB de canary
+            docker tag serviciudad-cali-backend:canary serviciudad-cali-backend:latest || true
+
+            docker run -d --name serviciudad-stable --network ci_net \
+              -p 8080:8080 \
+              -e SPRING_DATASOURCE_URL=jdbc:mariadb://serviciudad-mariadb:3306/serviciudad_db \
+              -e SPRING_DATASOURCE_USERNAME=serviciudad \
+              -e SPRING_DATASOURCE_PASSWORD=serviciudad123 \
+              -e SPRING_JPA_HIBERNATE_DDL_AUTO=update \
+              -e SERVER_PORT=8080 \
+              serviciudad-cali-backend:latest
+
+            echo "Stable started."
           else
             echo "Rollback: removing Canary..."
-            docker stop serviciudad-canary || true
-            docker rm serviciudad-canary || true
+            docker rm -f serviciudad-canary || true
           fi
