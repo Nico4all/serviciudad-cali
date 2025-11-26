@@ -2,9 +2,9 @@ name: CI Pipeline - ServiCiudad Cali
 
 on:
   push:
-    branches: ["*", "**"]   # Ejecuta CI en TODAS las ramas, incluyendo nico
+    branches: ["*", "**"]  
   pull_request:
-    branches: [main, develop, nico]   # PR desde cualquier rama hacia estas
+    branches: [main, develop, nico]   
 
 env:
   JAVA_VERSION: 21
@@ -141,7 +141,7 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     needs: build-test
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
       - name: Run Trivy vulnerability scanner
@@ -206,7 +206,6 @@ jobs:
     name: Promote or Rollback
     runs-on: ubuntu-latest
     needs: canary-deploy
-    # ⚠️ Solo para main
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
