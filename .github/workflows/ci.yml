@@ -2,9 +2,9 @@ name: CI Pipeline - ServiCiudad Cali
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, nico]
   pull_request:
-    branches: [main]
+    branches: [main, develop, nico]
 
 env:
   JAVA_VERSION: 21
@@ -76,7 +76,7 @@ jobs:
         with:
           files: ./target/site/jacoco/jacoco.xml
           token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true # falla CI si no alcanza la cobertura
+          fail_ci_if_error: true
 
   package:
     name: Package JAR
