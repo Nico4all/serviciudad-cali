@@ -165,25 +165,33 @@ jobs:
       - name: Load Docker image
         run: docker load -i /tmp/image.tar
 
-      - name: Tag image as canary
+      - name: Tag as canary
         run: docker tag serviciudad-cali-backend:latest serviciudad-cali-backend:canary
 
       - name: Run Canary container
         run: |
           docker stop serviciudad-canary || true
           docker rm serviciudad-canary || true
-          docker run -d --name serviciudad-canary -p 8081:8080 serviciudad-cali-backend:canary
+          docker run -d --name serviciudad-canary \
+            -p 8081:8080 \
+            serviciudad-cali-backend:canary
+          docker ps -a 
+          docker logs serviciudad-canary
 
       - name: Smoke test Canary
         run: |
-          for i in {1..30}; do
-            if curl -f http://localhost:8081/actuator/health; then
-              echo "Canary service is up!"
-              break
+          echo "Waiting for Canary health endpoint..."
+          for i in {1..40}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/actuator/health || true)
+            if [ "$STATUS" = "200" ]; then
+              echo "Canary is healthy!"
+              exit 0
             fi
-            echo "Waiting for Canary service..."
-            sleep 2
+            echo "Healthcheck failed ($STATUS)... retrying..."
+            sleep 3
           done
+          echo "ERROR: Canary did not become healthy"
+          exit 1
 
   promote-or-rollback:
     name: Promote or Rollback
@@ -192,6 +200,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
+
+      - name: Decide promotion automatically
+        run: echo "PROMOTE=true" >> $GITHUB_ENV
 
       - name: Download Docker image artifact
         uses: actions/download-artifact@v4
@@ -202,18 +213,20 @@ jobs:
       - name: Load Docker image
         run: docker load -i /tmp/image.tar
 
-      - name: Decide promotion or rollback
+      - name: Promote or Rollback
         run: |
-          PROMOTE=true
-          docker tag serviciudad-cali-backend:latest serviciudad-cali-backend:canary
-          if [ "$PROMOTE" = true ]; then
-            echo "Promoting canary to stable..."
+          if [ "$PROMOTE" = "true" ]; then
+            echo "Promoting Canary to Stable..."
             docker stop serviciudad-stable || true
             docker rm serviciudad-stable || true
+
             docker tag serviciudad-cali-backend:canary serviciudad-cali-backend:latest
-            docker run -d --name serviciudad-stable -p 8080:8080 serviciudad-cali-backend:latest
+
+            docker run -d --name serviciudad-stable \
+              -p 8080:8080 \
+              serviciudad-cali-backend:latest
           else
-            echo "Rolling back..."
+            echo "Rollback: removing Canary..."
             docker stop serviciudad-canary || true
             docker rm serviciudad-canary || true
           fi
