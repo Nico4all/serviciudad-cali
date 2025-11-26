@@ -1,5 +1,5 @@
 name: CI Pipeline - ServiCiudad Cali
-
+#
 permissions:
   actions: read
   contents: read
@@ -7,9 +7,9 @@ permissions:
   
 on:
   push:
-    branches: ['**']        # todos los pushes en cualquier rama
+    branches: ['**']       
   pull_request:
-    branches: ['**']        # todos los PRs (cualquier base branch)
+    branches: ['**']        
 
 env:
   JAVA_VERSION: 21
@@ -68,7 +68,7 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: test_password
 
       - name: Test report
-        if: ${{ github.event_name == 'pull_request' }}
+        if: always()
         uses: dorny/test-reporter@v1
         with:
           name: Maven Tests
@@ -249,7 +249,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Automáticamente promovemos mientras no haya fallos
       - name: Decide promotion automatically
         run: echo "PROMOTE=true" >> $GITHUB_ENV
 
